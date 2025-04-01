@@ -507,7 +507,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
             {/* Table */}
             <div className="rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="w-full">
-                    <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                    <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
