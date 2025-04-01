@@ -85,7 +85,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         }
         
         // Listen for Inertia page visits to show toast notifications
-        const handleSuccess = (event: any) => {
+        const handleSuccess = (event: CustomEvent) => {
             const flash = event?.detail?.page?.props?.flash;
             if (!flash) return;
             
@@ -111,7 +111,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         return () => {
             document.removeEventListener('inertia:success', handleSuccess);
         };
-    }, []);
+    }, [page.props.flash, toast]);
 
     const confirmDelete = (id: number, login: string) => {
         setAccountToDelete({ id, login });
@@ -170,7 +170,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         setIsEditModalOpen(true);
     };
 
-    const handleCreateSubmit = (data: any) => {
+    const handleCreateSubmit = (data: Record<string, unknown>) => {
         setProcessing(true);
         router.post(route('admin.accounts.store'), data, {
             onSuccess: () => {
@@ -193,7 +193,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         });
     };
 
-    const handleEditSubmit = (data: any) => {
+    const handleEditSubmit = (data: Record<string, unknown>) => {
         if (!selectedAccount) return;
         
         setProcessing(true);

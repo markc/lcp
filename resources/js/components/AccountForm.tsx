@@ -26,7 +26,7 @@ interface Account {
 interface AccountFormProps {
   account?: Account;
   roles: Record<number, string>;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, unknown>) => void;
   onCancel: () => void;
   isProcessing?: boolean;
   errors?: Record<string, string>;

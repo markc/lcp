@@ -39,7 +39,7 @@ import { useState } from 'react';
 
 // Extend TableMeta to include roles
 declare module '@tanstack/react-table' {
-    interface TableMeta<TData extends unknown> {
+    interface TableMeta {
         roles?: Record<number, string>;
     }
 }
@@ -65,7 +65,7 @@ interface AccountsTableProps {
 }
 
 // Define a fuzzy filter function
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+const fuzzyFilter: FilterFn<Account> = (row, columnId, value, addMeta) => {
     // Rank the item
     const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -143,7 +143,7 @@ function exportToCSV(table: Table<Account>, roles: Record<number, string>) {
 }
 
 // Column Filter component
-function ColumnFilter({ column, table }: { column: Column<any, unknown>; table: Table<any> }) {
+function ColumnFilter({ column, table }: { column: Column<Account, unknown>; table: Table<Account> }) {
     const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
 
     const columnFilterValue = column.getFilterValue();
@@ -328,7 +328,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                 </div>
             ),
             cell: (info) => roles[info.getValue()],
-            sortingFn: (rowA, rowB, columnId) => {
+            sortingFn: (rowA, rowB) => {
                 // Sort by role name, not by acl number
                 return roles[rowA.original.acl].localeCompare(roles[rowB.original.acl]);
             },
