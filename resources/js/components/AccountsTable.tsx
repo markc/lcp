@@ -178,7 +178,7 @@ function ColumnFilter({ column, table }: { column: Column<Account, unknown>; tab
                             column.setFilterValue((old: [number, number]) => [e.target.value ? parseInt(e.target.value) : undefined, old?.[1]])
                         }
                         placeholder="Min"
-                        className="h-8 min-w-[70px] text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500"
+                        className="h-8 min-w-[70px] text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
                     />
                 )}
             </div>
@@ -190,7 +190,7 @@ function ColumnFilter({ column, table }: { column: Column<Account, unknown>; tab
                 value={(columnFilterValue ?? '') as string}
                 onChange={(e) => column.setFilterValue(e.target.value)}
                 placeholder="Filter..."
-                className="h-6 min-w-[120px] text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500"
+                className="h-6 min-w-[120px] text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
             />
         </div>
     );
@@ -234,18 +234,18 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="px-0 font-medium text-gray-500 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
                         Email
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-gray-800">
-                                <FilterIcon className="h-3 w-3 dark:text-gray-300" />
+                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-stone-800">
+                                <FilterIcon className="h-3 w-3 dark:text-stone-300" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-60 p-2 dark:border-gray-700 dark:bg-gray-800">
+                        <PopoverContent align="start" className="w-60 p-2 dark:border-stone-700 dark:bg-stone-800">
                             <ColumnFilter column={column} table={table} />
                         </PopoverContent>
                     </Popover>
@@ -260,18 +260,18 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="px-0 font-medium text-gray-500 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
                         Name
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-gray-800">
-                                <FilterIcon className="h-3 w-3 dark:text-gray-300" />
+                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-stone-800">
+                                <FilterIcon className="h-3 w-3 dark:text-stone-300" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-60 p-2 dark:border-gray-700 dark:bg-gray-800">
+                        <PopoverContent align="start" className="w-60 p-2 dark:border-stone-700 dark:bg-stone-800">
                             <ColumnFilter column={column} table={table} />
                         </PopoverContent>
                     </Popover>
@@ -285,18 +285,18 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="px-0 font-medium text-gray-500 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
                         Alt Email
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-gray-800">
-                                <FilterIcon className="h-3 w-3 dark:text-gray-300" />
+                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-stone-800">
+                                <FilterIcon className="h-3 w-3 dark:text-stone-300" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-60 p-2 dark:border-gray-700 dark:bg-gray-800">
+                        <PopoverContent align="start" className="w-60 p-2 dark:border-stone-700 dark:bg-stone-800">
                             <ColumnFilter column={column} table={table} />
                         </PopoverContent>
                     </Popover>
@@ -310,18 +310,18 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="px-0 font-medium text-gray-500 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
                         Role
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-gray-800">
-                                <FilterIcon className="h-3 w-3 dark:text-gray-300" />
+                            <Button variant="ghost" className="h-7 w-7 p-0 dark:hover:bg-stone-800">
+                                <FilterIcon className="h-3 w-3 dark:text-stone-300" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-60 p-2 dark:border-gray-700 dark:bg-gray-800">
+                        <PopoverContent align="start" className="w-60 p-2 dark:border-stone-700 dark:bg-stone-800">
                             <ColumnFilter column={column} table={table} />
                         </PopoverContent>
                     </Popover>
@@ -343,7 +343,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                             size="sm" 
                             variant="outline" 
                             onClick={() => onEdit(account)}
-                            className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                         >
                             <EditIcon className="h-4 w-4" />
                         </Button>
@@ -351,7 +351,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                             size="sm" 
                             variant="outline" 
                             onClick={() => onSwitch(account.id, account.login)}
-                            className="dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                         >
                             <SwitchIcon className="h-4 w-4" />
                         </Button>
@@ -409,13 +409,13 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                 <div className="flex items-center gap-4">
                     {/* Page size selector */}
                     <Select value={table.getState().pagination.pageSize.toString()} onValueChange={(value) => table.setPageSize(Number(value))}>
-                        <SelectTrigger className="h-9 w-16 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        <SelectTrigger className="h-9 w-16 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="dark:border-gray-700 dark:bg-gray-800">
+                        <SelectContent className="dark:border-stone-700 dark:bg-stone-800">
                             <SelectGroup>
                                 {[5, 10, 20, 30, 40, 50].map((pageSize) => (
-                                    <SelectItem key={pageSize} value={pageSize.toString()} className="dark:text-gray-300 dark:focus:bg-gray-700">
+                                    <SelectItem key={pageSize} value={pageSize.toString()} className="dark:text-stone-300 dark:focus:bg-stone-700">
                                         {pageSize}
                                     </SelectItem>
                                 ))}
@@ -424,16 +424,16 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     </Select>
 
                     <div className="relative w-64">
-                        <Search className="absolute top-2.5 left-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        <Search className="absolute top-2.5 left-2 h-4 w-4 text-stone-500 dark:text-stone-400" />
                         <Input
                             placeholder="Search all columns..."
                             value={globalFilter ?? ''}
                             onChange={(e) => setGlobalFilter(e.target.value)}
-                            className="pl-8 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500"
+                            className="pl-8 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
                         />
                     </div>
                     <div className="flex items-center space-x-1">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-stone-500 dark:text-stone-400">
                             {table.getFilteredRowModel().rows.length} of {table.getCoreRowModel().rows.length} records
                         </p>
                     </div>
@@ -444,12 +444,12 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                     {/* Column visibility */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="ml-auto h-9 font-normal dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                            <Button variant="outline" size="sm" className="ml-auto h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
                                 <EyeIcon className="mr-2 h-4 w-4" />
                                 Columns
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="dark:border-gray-700 dark:bg-gray-800">
+                        <DropdownMenuContent align="end" className="dark:border-stone-700 dark:bg-stone-800">
                             {table
                                 .getAllColumns()
                                 .filter((column) => column.getCanHide())
@@ -466,7 +466,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                                     return (
                                         <DropdownMenuCheckboxItem
                                             key={column.id}
-                                            className="capitalize dark:text-gray-300"
+                                            className="capitalize dark:text-stone-300"
                                             checked={column.getIsVisible()}
                                             onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                         >
@@ -484,7 +484,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => setRowSelection({})} 
-                                className="h-9 font-normal dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                             >
                                 Clear Selection ({table.getSelectedRowModel().rows.length})
                             </Button>
@@ -496,7 +496,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                         variant="outline" 
                         size="sm" 
                         onClick={() => exportToCSV(table, roles)} 
-                        className="h-9 font-normal dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                     >
                         <Download className="mr-2 h-4 w-4" />
                         Export
@@ -505,25 +505,25 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="rounded-md border border-stone-200 dark:border-stone-700 overflow-hidden">
                 <table className="w-full">
-                    <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950">
+                    <thead className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-950">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <th key={header.id} className="px-3 py-2 text-left font-medium text-gray-500 dark:text-gray-300">
+                                    <th key={header.id} className="px-3 py-2 text-left font-medium text-stone-500 dark:text-stone-300">
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </th>
                                 ))}
                             </tr>
                         ))}
                     </thead>
-                    <tbody className="bg-white dark:bg-gray-900">
+                    <tbody className="bg-white dark:bg-stone-900">
                         {table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <tr key={row.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100">
+                                <tr key={row.id} className="border-b border-stone-200 dark:border-stone-700 hover:bg-stone-50 hover:text-stone-900 dark:hover:bg-stone-800 dark:hover:text-stone-100">
                                     {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="px-3 py-2 dark:text-gray-300">
+                                        <td key={cell.id} className="px-3 py-2 dark:text-stone-300">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
@@ -531,7 +531,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className="h-16 px-3 py-2 text-center dark:text-gray-300">
+                                <td colSpan={columns.length} className="h-16 px-3 py-2 text-center dark:text-stone-300">
                                     No results found.
                                 </td>
                             </tr>
@@ -542,7 +542,7 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
 
             {/* Pagination controls */}
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                <div className="flex-1 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex-1 text-sm text-stone-500 dark:text-stone-400">
                     Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
                     {Math.min(
                         (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
@@ -552,18 +552,18 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                 </div>
                 <div className="flex items-center">
                     {/* Page navigation */}
-                    <div className="flex items-center rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                    <div className="flex items-center rounded-md border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800">
                         <button
                             onClick={() => table.getCanPreviousPage() && table.firstPage()}
                             disabled={!table.getCanPreviousPage()}
-                            className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:disabled:opacity-30"
+                            className="px-4 py-2 text-sm text-stone-500 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-700 dark:disabled:opacity-30"
                         >
                             «
                         </button>
                         <button
                             onClick={() => table.getCanPreviousPage() && table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
-                            className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:disabled:opacity-30"
+                            className="px-4 py-2 text-sm text-stone-500 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-700 dark:disabled:opacity-30"
                         >
                             ‹
                         </button>
@@ -596,8 +596,8 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                                     onClick={() => table.setPageIndex(pageIndex)}
                                     className={`px-4 py-2 text-sm ${
                                         isActive 
-                                            ? 'bg-gray-600 text-white dark:bg-gray-600 dark:text-white' 
-                                            : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                                            ? 'bg-stone-600 text-white dark:bg-stone-600 dark:text-white' 
+                                            : 'text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-700'
                                     }`}
                                 >
                                     {pageIndex + 1}
@@ -608,14 +608,14 @@ export function AccountsTable({ accounts, roles, onDelete, onSwitch, onEdit }: A
                         <button
                             onClick={() => table.getCanNextPage() && table.nextPage()}
                             disabled={!table.getCanNextPage()}
-                            className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:disabled:opacity-30"
+                            className="px-4 py-2 text-sm text-stone-500 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-700 dark:disabled:opacity-30"
                         >
                             ›
                         </button>
                         <button
                             onClick={() => table.getCanNextPage() && table.lastPage()}
                             disabled={!table.getCanNextPage()}
-                            className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:disabled:opacity-30"
+                            className="px-4 py-2 text-sm text-stone-500 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-700 dark:disabled:opacity-30"
                         >
                             »
                         </button>
