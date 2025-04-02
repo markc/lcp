@@ -23,3 +23,6 @@ yarn-error.log
 /.vscode
 /.zed
 hcp_bs5/
+CLAUDE.md
+CURRENT_STATUS.md
+MIGRATION_PLAN.md

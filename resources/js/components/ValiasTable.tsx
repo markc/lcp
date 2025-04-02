@@ -2,12 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { router } from '@inertiajs/react';
 import { rankItem } from '@tanstack/match-sorter-utils';
 import {
-    Column,
     ColumnFiltersState,
     createColumnHelper,
     FilterFn,
@@ -32,7 +30,6 @@ import {
     Eye as EyeIcon,
     Filter as FilterIcon,
     Search,
-    Mail as MailIcon,
     Trash as TrashIcon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -139,7 +136,7 @@ function exportToCSV(table: Table<Valias>) {
 
 // Column Filter component
 function ColumnFilter({ column, table }: { column: Column<Valias, unknown>; table: Table<Valias> }) {
-    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
+    // const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
     const columnFilterValue = column.getFilterValue();
 
     return (

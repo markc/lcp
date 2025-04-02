@@ -1,5 +1,5 @@
-import { AccountsTable } from '@/components/AccountsTable';
-import { AccountForm } from '@/components/AccountForm';
+import { VhostsTable } from '@/components/VhostsTable';
+import { VhostForm } from '@/components/VhostForm';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -17,45 +17,56 @@ import { PlusIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Account {
+  id: number;
+  login: string;
+}
+
+interface Vhost {
+  id: number;
+  aid: number;
+  domain: string;
+  uname: string;
+  uid: number;
+  gid: number;
+  aliases: number;
+  mailboxes: number;
+  mailquota: number;
+  diskquota: number;
+  active: boolean;
+  account: {
     id: number;
     login: string;
-    fname: string;
-    lname: string;
-    altemail: string | null;
-    acl: number;
-    grp: number;
-    vhosts?: number;
-    updated_at: string;
-    created_at: string;
+  };
+  updated_at: string;
 }
 
 interface Props {
-    accounts: {
-        data: Account[];
-        links: { url: string | null; label: string }[];
-        total: number;
-    };
-    roles: Record<number, string>;
-    errors?: Record<string, string>;
+  vhosts: {
+    data: Vhost[];
+    links: { url: string | null; label: string }[];
+    total: number;
+  };
+  accounts: Account[];
+  errors?: Record<string, string>;
 }
 
-export default function AccountsIndex({ accounts = { data: [], links: [], total: 0 }, roles = {}, errors = {} }: Props) {
+export default function VhostsIndex({ vhosts = { data: [], links: [], total: 0 }, accounts = [], errors = {} }: Props) {
     const { toast } = useToast();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+    const [selectedVhost, setSelectedVhost] = useState<Vhost | null>(null);
     const [processing, setProcessing] = useState(false);
     
     // Confirmation modal state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [accountToDelete, setAccountToDelete] = useState<{ id: number, login: string } | null>(null);
+    const [vhostToDelete, setVhostToDelete] = useState<{ id: number, domain: string } | null>(null);
     
     // Multiple delete confirmation state
     const [isMultiDeleteModalOpen, setIsMultiDeleteModalOpen] = useState(false);
-    const [accountsToDelete, setAccountsToDelete] = useState<number[]>([]);
+    const [vhostsToDelete, setVhostsToDelete] = useState<number[]>([]);
     
-    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
-    const [accountToSwitch, setAccountToSwitch] = useState<{ id: number, login: string } | null>(null);
+    const [isCommandModalOpen, setIsCommandModalOpen] = useState(false);
+    const [vhostForCommand, setVhostForCommand] = useState<{ id: number, domain: string, command: string } | null>(null);
 
     // Show toast notifications for flash messages
     const page = usePage<{
@@ -117,25 +128,25 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         };
     }, [page.props.flash, toast]);
 
-    const confirmDelete = (id: number, login: string) => {
-        setAccountToDelete({ id, login });
+    const confirmDelete = (id: number, domain: string) => {
+        setVhostToDelete({ id, domain });
         setIsDeleteModalOpen(true);
     };
     
     const handleDeleteConfirm = () => {
-        if (accountToDelete) {
-            router.delete(route('admin.accounts.destroy', accountToDelete.id), {
+        if (vhostToDelete) {
+            router.delete(route('admin.vhosts.destroy', vhostToDelete.id), {
                 onSuccess: () => {
                     toast({
                         title: "Success",
-                        description: `Account ${accountToDelete.login} deleted successfully.`,
+                        description: `Virtual host ${vhostToDelete.domain} deleted successfully.`,
                         variant: "success",
                     });
                 },
                 onError: () => {
                     toast({
                         title: "Error",
-                        description: "Failed to delete account.",
+                        description: "Failed to delete virtual host.",
                         variant: "destructive",
                     });
                 },
@@ -144,24 +155,24 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
     };
     
     const confirmDeleteMultiple = (ids: number[]) => {
-        setAccountsToDelete(ids);
+        setVhostsToDelete(ids);
         setIsMultiDeleteModalOpen(true);
     };
     
     const handleMultiDeleteConfirm = () => {
-        if (accountsToDelete.length > 0) {
-            router.post(route('admin.accounts.destroyMultiple'), { ids: accountsToDelete }, {
+        if (vhostsToDelete.length > 0) {
+            router.post(route('admin.vhosts.destroyMultiple'), { ids: vhostsToDelete }, {
                 onSuccess: () => {
                     toast({
                         title: "Success",
-                        description: `${accountsToDelete.length} accounts deleted successfully.`,
+                        description: `${vhostsToDelete.length} virtual hosts deleted successfully.`,
                         variant: "success",
                     });
                 },
                 onError: () => {
                     toast({
                         title: "Error",
-                        description: "Failed to delete accounts.",
+                        description: "Failed to delete virtual hosts.",
                         variant: "destructive",
                     });
                 },
@@ -169,25 +180,27 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         }
     };
 
-    const switchToUser = (id: number, login: string) => {
-        setAccountToSwitch({ id, login });
-        setIsSwitchModalOpen(true);
+    const executeCommand = (id: number, command: string, domain: string) => {
+        setVhostForCommand({ id, domain, command });
+        setIsCommandModalOpen(true);
     };
     
-    const handleSwitchConfirm = () => {
-        if (accountToSwitch) {
-            router.post(route('admin.accounts.switch', accountToSwitch.id), {}, {
+    const handleCommandConfirm = () => {
+        if (vhostForCommand) {
+            router.post(route('admin.vhosts.execute', vhostForCommand.id), {
+                command: vhostForCommand.command,
+            }, {
                 onSuccess: () => {
                     toast({
                         title: "Success",
-                        description: `Switched to user account: ${accountToSwitch.login}`,
+                        description: `Command executed for ${vhostForCommand.domain} successfully.`,
                         variant: "success",
                     });
                 },
                 onError: () => {
                     toast({
                         title: "Error",
-                        description: "Failed to switch user account.",
+                        description: "Failed to execute command.",
                         variant: "destructive",
                     });
                 },
@@ -195,20 +208,20 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
         }
     };
 
-    const openEditModal = (account: Account) => {
-        setSelectedAccount(account);
+    const openEditModal = (vhost: Vhost) => {
+        setSelectedVhost(vhost);
         setIsEditModalOpen(true);
     };
 
     const handleCreateSubmit = (data: Record<string, unknown>) => {
         setProcessing(true);
-        router.post(route('admin.accounts.store'), data, {
+        router.post(route('admin.vhosts.store'), data, {
             onSuccess: () => {
                 setIsCreateModalOpen(false);
                 setProcessing(false);
                 toast({
                     title: "Success",
-                    description: "Account created successfully.",
+                    description: "Virtual host created successfully.",
                     variant: "success",
                 });
             },
@@ -216,7 +229,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 setProcessing(false);
                 toast({
                     title: "Error",
-                    description: "Failed to create account. Please check the form for errors.",
+                    description: "Failed to create virtual host. Please check the form for errors.",
                     variant: "destructive",
                 });
             },
@@ -224,17 +237,17 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
     };
 
     const handleEditSubmit = (data: Record<string, unknown>) => {
-        if (!selectedAccount) return;
+        if (!selectedVhost) return;
         
         setProcessing(true);
-        router.put(route('admin.accounts.update', selectedAccount.id), data, {
+        router.put(route('admin.vhosts.update', selectedVhost.id), data, {
             onSuccess: () => {
                 setIsEditModalOpen(false);
-                setSelectedAccount(null);
+                setSelectedVhost(null);
                 setProcessing(false);
                 toast({
                     title: "Success",
-                    description: "Account updated successfully.",
+                    description: "Virtual host updated successfully.",
                     variant: "success",
                 });
             },
@@ -242,7 +255,7 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 setProcessing(false);
                 toast({
                     title: "Error",
-                    description: "Failed to update account. Please check the form for errors.",
+                    description: "Failed to update virtual host. Please check the form for errors.",
                     variant: "destructive",
                 });
             },
@@ -255,40 +268,39 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
             href: route('dashboard'),
         },
         {
-            title: 'Accounts',
-            href: route('admin.accounts.index'),
+            title: 'Virtual Hosts',
+            href: route('admin.vhosts.index'),
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="my-4 flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Accounts</h1>
+                <h1 className="text-2xl font-bold">Virtual Hosts</h1>
                 <Button onClick={() => setIsCreateModalOpen(true)}>
                     <PlusIcon className="mr-2 h-4 w-4" />
-                    Add Account
+                    Add Virtual Host
                 </Button>
             </div>
 
             <Card className="p-6">
                 <div className="overflow-x-auto">
-                    {accounts.data && accounts.data.length > 0 ? (
-                        <AccountsTable 
-                            accounts={accounts.data} 
-                            roles={roles} 
+                    {vhosts.data && vhosts.data.length > 0 ? (
+                        <VhostsTable 
+                            vhosts={vhosts.data} 
                             onDelete={confirmDelete}
                             onDeleteSelected={confirmDeleteMultiple}
-                            onSwitch={switchToUser}
+                            onExecuteCommand={executeCommand}
                             onEdit={openEditModal} 
                         />
                     ) : (
                         <div className="py-10 text-center">
-                            <h3 className="text-lg font-medium text-gray-700">No accounts found</h3>
-                            <p className="mt-2 text-gray-500">Get started by creating your first account</p>
+                            <h3 className="text-lg font-medium text-stone-700 dark:text-stone-300">No virtual hosts found</h3>
+                            <p className="mt-2 text-stone-500 dark:text-stone-400">Get started by creating your first virtual host</p>
                             <div className="mt-6">
                                 <Button onClick={() => setIsCreateModalOpen(true)}>
                                     <PlusIcon className="mr-2 h-4 w-4" />
-                                    Create Account
+                                    Create Virtual Host
                                 </Button>
                             </div>
                         </div>
@@ -296,18 +308,18 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 </div>
             </Card>
 
-            {/* Create Account Modal */}
+            {/* Create Virtual Host Modal */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[600px]" aria-describedby="create-account-form">
+                <DialogContent className="sm:max-w-[800px]" aria-describedby="create-vhost-form">
                     <DialogHeader>
-                        <DialogTitle>Create Account</DialogTitle>
+                        <DialogTitle>Create Virtual Host</DialogTitle>
                         <DialogDescription>
-                            Fill in the form to create a new account
+                            Fill in the form to create a new virtual host
                         </DialogDescription>
                     </DialogHeader>
-                    <div id="create-account-form">
-                        <AccountForm 
-                            roles={roles} 
+                    <div id="create-vhost-form">
+                        <VhostForm 
+                            accounts={accounts} 
                             onSubmit={handleCreateSubmit} 
                             onCancel={() => setIsCreateModalOpen(false)}
                             isProcessing={processing}
@@ -317,24 +329,24 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Account Modal */}
+            {/* Edit Virtual Host Modal */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[600px]" aria-describedby="edit-account-form">
+                <DialogContent className="sm:max-w-[800px]" aria-describedby="edit-vhost-form">
                     <DialogHeader>
-                        <DialogTitle>Edit Account</DialogTitle>
+                        <DialogTitle>Edit Virtual Host</DialogTitle>
                         <DialogDescription>
-                            Update the account information
+                            Update the virtual host information
                         </DialogDescription>
                     </DialogHeader>
-                    {selectedAccount && (
-                        <div id="edit-account-form">
-                            <AccountForm 
-                                account={selectedAccount}
-                                roles={roles} 
+                    {selectedVhost && (
+                        <div id="edit-vhost-form">
+                            <VhostForm 
+                                vhost={selectedVhost}
+                                accounts={accounts} 
                                 onSubmit={handleEditSubmit} 
                                 onCancel={() => {
                                     setIsEditModalOpen(false);
-                                    setSelectedAccount(null);
+                                    setSelectedVhost(null);
                                 }}
                                 isProcessing={processing}
                                 errors={errors}
@@ -349,8 +361,8 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteConfirm}
-                title="Delete Account"
-                description={`Are you sure you want to delete account ${accountToDelete?.login}? This action cannot be undone.`}
+                title="Delete Virtual Host"
+                description={`Are you sure you want to delete ${vhostToDelete?.domain}? This will also remove all mailboxes and aliases associated with it. This action cannot be undone.`}
                 confirmText="Delete"
                 cancelText="Cancel"
                 confirmVariant="destructive"
@@ -361,21 +373,21 @@ export default function AccountsIndex({ accounts = { data: [], links: [], total:
                 isOpen={isMultiDeleteModalOpen}
                 onClose={() => setIsMultiDeleteModalOpen(false)}
                 onConfirm={handleMultiDeleteConfirm}
-                title="Delete Multiple Accounts"
-                description={`Are you sure you want to delete ${accountsToDelete.length} selected accounts? This action cannot be undone.`}
+                title="Delete Multiple Virtual Hosts"
+                description={`Are you sure you want to delete ${vhostsToDelete.length} selected virtual hosts? This will also remove all mailboxes and aliases associated with them. This action cannot be undone.`}
                 confirmText="Delete All"
                 cancelText="Cancel"
                 confirmVariant="destructive"
             />
             
-            {/* Switch User Confirmation Modal */}
+            {/* Command Confirmation Modal */}
             <ConfirmationModal 
-                isOpen={isSwitchModalOpen}
-                onClose={() => setIsSwitchModalOpen(false)}
-                onConfirm={handleSwitchConfirm}
-                title="Switch to User Account"
-                description={`Are you sure you want to switch to user account ${accountToSwitch?.login}? You will be logged out of your admin account.`}
-                confirmText="Switch"
+                isOpen={isCommandModalOpen}
+                onClose={() => setIsCommandModalOpen(false)}
+                onConfirm={handleCommandConfirm}
+                title="Execute Server Command"
+                description={`Are you sure you want to execute the ${vhostForCommand?.command} command for ${vhostForCommand?.domain}?`}
+                confirmText="Execute"
                 cancelText="Cancel"
                 confirmVariant="default"
             />
