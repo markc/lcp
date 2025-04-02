@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-// Popover removed
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { router } from '@inertiajs/react';
 import { rankItem } from '@tanstack/match-sorter-utils';
@@ -32,41 +32,33 @@ import {
     Eye as EyeIcon,
     Filter as FilterIcon,
     Search,
-    ToggleRight as SwitchIcon,
+    Mail as MailIcon,
     Trash as TrashIcon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-// Extend TableMeta to include roles
-declare module '@tanstack/react-table' {
-    interface TableMeta {
-        roles?: Record<number, string>;
-    }
-}
-
-interface Account {
+interface Valias {
     id: number;
-    login: string;
-    fname: string;
-    lname: string;
-    altemail: string | null;
-    acl: number;
-    grp: number;
+    source: string;
+    target: string;
+    active: boolean;
     created_at: string;
     updated_at: string;
+    vhost: {
+        id: number;
+        domain: string;
+    };
 }
 
-interface AccountsTableProps {
-    accounts: Account[];
-    roles: Record<number, string>;
-    onDelete: (id: number, login: string) => void;
+interface ValiasTableProps {
+    aliases: Valias[];
+    onDelete: (id: number, source: string, domain: string) => void;
     onDeleteSelected: (ids: number[]) => void;
-    onSwitch: (id: number, login: string) => void;
-    onEdit: (account: Account) => void;
+    onEdit: (valias: Valias) => void;
 }
 
 // Define a fuzzy filter function
-const fuzzyFilter: FilterFn<Account> = (row, columnId, value, addMeta) => {
+const fuzzyFilter: FilterFn<Valias> = (row, columnId, value, addMeta) => {
     // Rank the item
     const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -80,7 +72,7 @@ const fuzzyFilter: FilterFn<Account> = (row, columnId, value, addMeta) => {
 };
 
 // Function to export table data to CSV
-function exportToCSV(table: Table<Account>, roles: Record<number, string>) {
+function exportToCSV(table: Table<Valias>) {
     // Get visible columns
     const visibleColumns = table.getAllColumns().filter((column) => column.getIsVisible());
 
@@ -89,10 +81,10 @@ function exportToCSV(table: Table<Account>, roles: Record<number, string>) {
         .map((column) => {
             // Map internal column IDs to user-friendly headers
             const headerMap: Record<string, string> = {
-                login: 'Email',
-                name: 'Name',
-                altemail: 'Alt Email',
-                acl: 'Role',
+                source: 'Source',
+                'vhost.domain': 'Domain',
+                target: 'Target',
+                active: 'Status',
             };
             return headerMap[column.id] || column.id;
         })
@@ -108,20 +100,22 @@ function exportToCSV(table: Table<Account>, roles: Record<number, string>) {
             return visibleColumns
                 .map((column) => {
                     // Skip Actions column
-                    if (column.id === 'id') return null;
+                    if (column.id === 'id' || column.id === 'Actions') return null;
 
-                    // Format role values
-                    if (column.id === 'acl') {
-                        return `"${roles[row.original.acl]}"`;
-                    }
-
-                    // Handle special case for name
-                    if (column.id === 'name') {
-                        return `"${row.original.fname} ${row.original.lname}"`;
+                    // Format specific columns
+                    if (column.id === 'active') {
+                        return `"${row.original.active ? 'Active' : 'Inactive'}"`;
                     }
 
                     // Get cell value
-                    const value = column.accessorFn ? column.accessorFn(row.original, 0) : row.original[column.id as keyof Account];
+                    let value;
+                    if (column.id === 'vhost.domain') {
+                        value = row.original.vhost.domain;
+                    } else if (column.id === 'source') {
+                        value = `${row.original.source}@${row.original.vhost.domain}`;
+                    } else {
+                        value = row.getValue(column.id);
+                    }
 
                     // Quote strings
                     return typeof value === 'string' ? `"${value}"` : value;
@@ -136,16 +130,32 @@ function exportToCSV(table: Table<Account>, roles: Record<number, string>) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `accounts_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `aliases_export_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
-// Column Filter component removed
+// Column Filter component
+function ColumnFilter({ column, table }: { column: Column<Valias, unknown>; table: Table<Valias> }) {
+    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
+    const columnFilterValue = column.getFilterValue();
 
-export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onSwitch, onEdit }: AccountsTableProps) {
+    return (
+        <div className="px-1 py-2">
+            <Input
+                type="text"
+                value={(columnFilterValue ?? '') as string}
+                onChange={(e) => column.setFilterValue(e.target.value)}
+                placeholder="Filter..."
+                className="h-6 min-w-[120px] text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
+            />
+        </div>
+    );
+}
+
+export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: ValiasTableProps) {
     // State for table features
     const [sorting, setSorting] = useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -158,7 +168,7 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
     // Reset row selection when the data changes
     useEffect(() => {
         setRowSelection({});
-    }, [accounts]);
+    }, [aliases]);
     
     // Apply appropriate filter when search column or value changes
     useEffect(() => {
@@ -176,7 +186,7 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
         }
     }, [searchColumn, searchValue]);
 
-    const columnHelper = createColumnHelper<Account>();
+    const columnHelper = createColumnHelper<Valias>();
 
     const columns = [
         // Row selection column
@@ -200,7 +210,7 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
             enableHiding: false,
         }),
         // Data columns
-        columnHelper.accessor('login', {
+        columnHelper.accessor('source', {
             header: ({ column }) => (
                 <div className="flex items-center space-x-1">
                     <Button
@@ -208,15 +218,16 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                         className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
-                        Email
+                        Source
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             ),
-            cell: (info) => info.getValue(),
+            cell: (info) => (
+                <span className="font-medium">{info.getValue()}</span>
+            ),
         }),
-        columnHelper.accessor((row) => `${row.fname} ${row.lname}`, {
-            id: 'name',
+        columnHelper.accessor('vhost.domain', {
             header: ({ column }) => (
                 <div className="flex items-center space-x-1">
                     <Button
@@ -224,14 +235,23 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                         className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
-                        Name
+                        Domain
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             ),
-            cell: (info) => info.getValue(),
+            cell: (info) => (
+              <a 
+                href={`https://${info.getValue()}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-600 hover:underline dark:text-blue-400"
+              >
+                {info.getValue()}
+              </a>
+            ),
         }),
-        columnHelper.accessor('altemail', {
+        columnHelper.accessor('target', {
             header: ({ column }) => (
                 <div className="flex items-center space-x-1">
                     <Button
@@ -239,58 +259,79 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                         className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
                     >
-                        Alt Email
+                        Target
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             ),
-            cell: (info) => info.getValue() || '',
-        }),
-        columnHelper.accessor('acl', {
-            header: ({ column }) => (
-                <div className="flex items-center space-x-1">
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
-                    >
-                        Role
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            ),
-            cell: (info) => roles[info.getValue()],
-            sortingFn: (rowA, rowB) => {
-                // Sort by role name, not by acl number
-                return roles[rowA.original.acl].localeCompare(roles[rowB.original.acl]);
+            cell: (info) => {
+                const target = info.getValue();
+                const isEmail = target.includes('@');
+                
+                if (isEmail) {
+                    return (
+                        <a
+                            href={`mailto:${target}`}
+                            className="text-blue-600 hover:underline dark:text-blue-400 truncate max-w-[16rem]"
+                            title={target}
+                        >
+                            {target}
+                        </a>
+                    );
+                }
+                
+                return (
+                    <span className="truncate max-w-[16rem] block" title={target}>
+                        {target}
+                    </span>
+                );
             },
+        }),
+        columnHelper.accessor('active', {
+            header: ({ column }) => (
+                <div className="flex items-center space-x-1">
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                        className="px-0 font-medium text-stone-500 dark:text-stone-300 dark:hover:bg-stone-800"
+                    >
+                        Status
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+            ),
+            cell: (info) => (
+                <span 
+                    className={`px-2 py-1 rounded text-xs ${
+                        info.getValue() 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    }`}
+                >
+                    {info.getValue() ? 'Active' : 'Inactive'}
+                </span>
+            ),
         }),
         columnHelper.accessor('id', {
             header: 'Actions',
             cell: (info) => {
-                const account = info.row.original;
+                const valias = info.row.original;
+                const fullEmail = `${valias.source}@${valias.vhost.domain}`;
+                
                 return (
                     <div className="flex space-x-2">
                         <Button 
                             size="sm" 
                             variant="outline" 
-                            onClick={() => onEdit(account)}
+                            onClick={() => onEdit(valias)}
                             className="dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                         >
                             <EditIcon className="h-4 w-4" />
                         </Button>
                         <Button 
                             size="sm" 
-                            variant="outline" 
-                            onClick={() => onSwitch(account.id, account.login)}
-                            className="dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
-                        >
-                            <SwitchIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                            size="sm" 
                             variant="destructive" 
-                            onClick={() => onDelete(account.id, account.login)}
+                            onClick={() => onDelete(valias.id, valias.source, valias.vhost.domain)}
                             className="dark:hover:bg-red-800"
                         >
                             <TrashIcon className="h-4 w-4" />
@@ -302,7 +343,7 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
     ];
 
     const table = useReactTable({
-        data: accounts,
+        data: aliases,
         columns,
         filterFns: {
             fuzzy: fuzzyFilter,
@@ -313,9 +354,6 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
             globalFilter,
             rowSelection,
             columnVisibility,
-        },
-        meta: {
-            roles, // Pass roles to be used in filters
         },
         enableRowSelection: true,
         onRowSelectionChange: setRowSelection,
@@ -362,13 +400,13 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                                     <FilterIcon className="mr-2 h-4 w-4" />
                                     {searchColumn === 'all' 
                                         ? 'All Columns' 
-                                        : searchColumn === 'login' 
-                                            ? 'Email' 
-                                            : searchColumn === 'name' 
-                                                ? 'Name' 
-                                                : searchColumn === 'altemail' 
-                                                    ? 'Alt Email'
-                                                    : 'Role'}
+                                        : searchColumn === 'source' 
+                                            ? 'Source' 
+                                            : searchColumn === 'vhost.domain' 
+                                                ? 'Domain' 
+                                                : searchColumn === 'target' 
+                                                    ? 'Target' 
+                                                    : 'Status'}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="dark:border-stone-700 dark:bg-stone-800">
@@ -380,39 +418,39 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                                     All Columns
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
-                                    checked={searchColumn === 'login'}
-                                    onCheckedChange={() => setSearchColumn('login')}
+                                    checked={searchColumn === 'source'}
+                                    onCheckedChange={() => setSearchColumn('source')}
                                     className="capitalize dark:text-stone-300"
                                 >
-                                    Email
+                                    Source
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
-                                    checked={searchColumn === 'name'}
-                                    onCheckedChange={() => setSearchColumn('name')}
+                                    checked={searchColumn === 'vhost.domain'}
+                                    onCheckedChange={() => setSearchColumn('vhost.domain')}
                                     className="capitalize dark:text-stone-300"
                                 >
-                                    Name
+                                    Domain
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
-                                    checked={searchColumn === 'altemail'}
-                                    onCheckedChange={() => setSearchColumn('altemail')}
+                                    checked={searchColumn === 'target'}
+                                    onCheckedChange={() => setSearchColumn('target')}
                                     className="capitalize dark:text-stone-300"
                                 >
-                                    Alt Email
+                                    Target
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
-                                    checked={searchColumn === 'acl'}
-                                    onCheckedChange={() => setSearchColumn('acl')}
+                                    checked={searchColumn === 'active'}
+                                    onCheckedChange={() => setSearchColumn('active')}
                                     className="capitalize dark:text-stone-300"
                                 >
-                                    Role
+                                    Status
                                 </DropdownMenuCheckboxItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <div className="relative w-64">
                             <Search className="absolute top-2.5 left-2 h-4 w-4 text-stone-500 dark:text-stone-400" />
                             <Input
-                                placeholder={searchColumn === 'all' ? "Search all columns..." : `Search by ${searchColumn === 'login' ? 'email' : searchColumn}...`}
+                                placeholder={searchColumn === 'all' ? "Search all columns..." : `Search by ${searchColumn === 'vhost.domain' ? 'domain' : searchColumn}...`}
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 className="pl-8 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
@@ -443,10 +481,10 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                                 .map((column) => {
                                     // Map internal column IDs to user-friendly names
                                     const columnNames: Record<string, string> = {
-                                        login: 'Email',
-                                        name: 'Name',
-                                        altemail: 'Alt Email',
-                                        acl: 'Role',
+                                        source: 'Source',
+                                        'vhost.domain': 'Domain',
+                                        target: 'Target',
+                                        active: 'Status',
                                         id: 'Actions',
                                     };
 
@@ -493,7 +531,7 @@ export function AccountsTable({ accounts, roles, onDelete, onDeleteSelected, onS
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => exportToCSV(table, roles)} 
+                        onClick={() => exportToCSV(table)} 
                         className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                     >
                         <Download className="mr-2 h-4 w-4" />
