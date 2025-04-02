@@ -3,7 +3,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { router } from '@inertiajs/react';
 import { rankItem } from '@tanstack/match-sorter-utils';
 import {
     ColumnFiltersState,
@@ -23,16 +22,8 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import {
-    ArrowUpDown,
-    Download,
-    Edit as EditIcon,
-    Eye as EyeIcon,
-    Filter as FilterIcon,
-    Search,
-    Trash as TrashIcon,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowUpDown, Download, Edit as EditIcon, Eye as EyeIcon, Filter as FilterIcon, Search, Trash as TrashIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Valias {
     id: number;
@@ -134,24 +125,6 @@ function exportToCSV(table: Table<Valias>) {
     document.body.removeChild(link);
 }
 
-// Column Filter component
-function ColumnFilter({ column, table }: { column: Column<Valias, unknown>; table: Table<Valias> }) {
-    // const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
-    const columnFilterValue = column.getFilterValue();
-
-    return (
-        <div className="px-1 py-2">
-            <Input
-                type="text"
-                value={(columnFilterValue ?? '') as string}
-                onChange={(e) => column.setFilterValue(e.target.value)}
-                placeholder="Filter..."
-                className="h-6 min-w-[120px] text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
-            />
-        </div>
-    );
-}
-
 export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: ValiasTableProps) {
     // State for table features
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -161,12 +134,12 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [searchColumn, setSearchColumn] = useState<string>('all');
     const [searchValue, setSearchValue] = useState<string>('');
-    
+
     // Reset row selection when the data changes
     useEffect(() => {
         setRowSelection({});
     }, [aliases]);
-    
+
     // Apply appropriate filter when search column or value changes
     useEffect(() => {
         if (searchColumn === 'all') {
@@ -174,9 +147,7 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
             setColumnFilters([]);
         } else if (searchValue) {
             setGlobalFilter('');
-            setColumnFilters([
-                { id: searchColumn, value: searchValue }
-            ]);
+            setColumnFilters([{ id: searchColumn, value: searchValue }]);
         } else {
             setGlobalFilter('');
             setColumnFilters([]);
@@ -220,9 +191,7 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     </Button>
                 </div>
             ),
-            cell: (info) => (
-                <span className="font-medium">{info.getValue()}</span>
-            ),
+            cell: (info) => <span className="font-medium">{info.getValue()}</span>,
         }),
         columnHelper.accessor('vhost.domain', {
             header: ({ column }) => (
@@ -238,14 +207,14 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                 </div>
             ),
             cell: (info) => (
-              <a 
-                href={`https://${info.getValue()}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-600 hover:underline dark:text-blue-400"
-              >
-                {info.getValue()}
-              </a>
+                <a
+                    href={`https://${info.getValue()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline dark:text-blue-400"
+                >
+                    {info.getValue()}
+                </a>
             ),
         }),
         columnHelper.accessor('target', {
@@ -264,21 +233,21 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
             cell: (info) => {
                 const target = info.getValue();
                 const isEmail = target.includes('@');
-                
+
                 if (isEmail) {
                     return (
                         <a
                             href={`mailto:${target}`}
-                            className="text-blue-600 hover:underline dark:text-blue-400 truncate max-w-[16rem]"
+                            className="max-w-[16rem] truncate text-blue-600 hover:underline dark:text-blue-400"
                             title={target}
                         >
                             {target}
                         </a>
                     );
                 }
-                
+
                 return (
-                    <span className="truncate max-w-[16rem] block" title={target}>
+                    <span className="block max-w-[16rem] truncate" title={target}>
                         {target}
                     </span>
                 );
@@ -298,10 +267,10 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                 </div>
             ),
             cell: (info) => (
-                <span 
-                    className={`px-2 py-1 rounded text-xs ${
-                        info.getValue() 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                <span
+                    className={`rounded px-2 py-1 text-xs ${
+                        info.getValue()
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                     }`}
                 >
@@ -313,21 +282,20 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
             header: 'Actions',
             cell: (info) => {
                 const valias = info.row.original;
-                const fullEmail = `${valias.source}@${valias.vhost.domain}`;
-                
+
                 return (
                     <div className="flex space-x-2">
-                        <Button 
-                            size="sm" 
-                            variant="outline" 
+                        <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => onEdit(valias)}
                             className="dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                         >
                             <EditIcon className="h-4 w-4" />
                         </Button>
-                        <Button 
-                            size="sm" 
-                            variant="destructive" 
+                        <Button
+                            size="sm"
+                            variant="destructive"
                             onClick={() => onDelete(valias.id, valias.source, valias.vhost.domain)}
                             className="dark:hover:bg-red-800"
                         >
@@ -393,17 +361,21 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     <div className="flex items-center gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+                                >
                                     <FilterIcon className="mr-2 h-4 w-4" />
-                                    {searchColumn === 'all' 
-                                        ? 'All Columns' 
-                                        : searchColumn === 'source' 
-                                            ? 'Source' 
-                                            : searchColumn === 'vhost.domain' 
-                                                ? 'Domain' 
-                                                : searchColumn === 'target' 
-                                                    ? 'Target' 
-                                                    : 'Status'}
+                                    {searchColumn === 'all'
+                                        ? 'All Columns'
+                                        : searchColumn === 'source'
+                                          ? 'Source'
+                                          : searchColumn === 'vhost.domain'
+                                            ? 'Domain'
+                                            : searchColumn === 'target'
+                                              ? 'Target'
+                                              : 'Status'}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="dark:border-stone-700 dark:bg-stone-800">
@@ -447,7 +419,11 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                         <div className="relative w-64">
                             <Search className="absolute top-2.5 left-2 h-4 w-4 text-stone-500 dark:text-stone-400" />
                             <Input
-                                placeholder={searchColumn === 'all' ? "Search all columns..." : `Search by ${searchColumn === 'vhost.domain' ? 'domain' : searchColumn}...`}
+                                placeholder={
+                                    searchColumn === 'all'
+                                        ? 'Search all columns...'
+                                        : `Search by ${searchColumn === 'vhost.domain' ? 'domain' : searchColumn}...`
+                                }
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 className="pl-8 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:placeholder-stone-500"
@@ -466,7 +442,11 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     {/* Column visibility */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="ml-auto h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+                            >
                                 <EyeIcon className="mr-2 h-4 w-4" />
                                 Columns
                             </Button>
@@ -502,21 +482,21 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     {/* Row selection actions */}
                     {table.getSelectedRowModel().rows.length > 0 && (
                         <div className="flex items-center space-x-2">
-                            <Button 
-                                size="sm" 
-                                variant="outline" 
-                                onClick={() => setRowSelection({})} 
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setRowSelection({})}
                                 className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                             >
                                 Clear Selection ({table.getSelectedRowModel().rows.length})
                             </Button>
-                            <Button 
-                                size="sm" 
-                                variant="destructive" 
+                            <Button
+                                size="sm"
+                                variant="destructive"
                                 onClick={() => {
-                                    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id);
+                                    const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
                                     onDeleteSelected(selectedIds);
-                                }} 
+                                }}
                                 className="h-9 font-normal"
                             >
                                 Delete Selected ({table.getSelectedRowModel().rows.length})
@@ -525,10 +505,10 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     )}
 
                     {/* Export */}
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => exportToCSV(table)} 
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => exportToCSV(table)}
                         className="h-9 font-normal dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                     >
                         <Download className="mr-2 h-4 w-4" />
@@ -538,7 +518,7 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="overflow-hidden rounded-md border border-stone-200 dark:border-stone-700">
                 <table className="w-full">
                     <thead className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-950">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -554,7 +534,10 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                     <tbody className="bg-white dark:bg-stone-900">
                         {table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
-                                <tr key={row.id} className="border-b border-stone-200 dark:border-stone-700 hover:bg-stone-50 hover:text-stone-900 dark:hover:bg-stone-800 dark:hover:text-stone-100">
+                                <tr
+                                    key={row.id}
+                                    className="border-b border-stone-200 hover:bg-stone-50 hover:text-stone-900 dark:border-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+                                >
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="px-3 py-2 dark:text-stone-300">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -628,8 +611,8 @@ export function ValiasTable({ aliases, onDelete, onDeleteSelected, onEdit }: Val
                                     key={pageIndex}
                                     onClick={() => table.setPageIndex(pageIndex)}
                                     className={`px-4 py-2 text-sm ${
-                                        isActive 
-                                            ? 'bg-stone-600 text-white dark:bg-stone-600 dark:text-white' 
+                                        isActive
+                                            ? 'bg-stone-600 text-white dark:bg-stone-600 dark:text-white'
                                             : 'text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-700'
                                     }`}
                                 >
